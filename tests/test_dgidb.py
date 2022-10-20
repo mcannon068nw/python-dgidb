@@ -1,4 +1,4 @@
-import dgidb
+from dgidb import dgidb
 import requests
 import pandas as pd
 import pytest
