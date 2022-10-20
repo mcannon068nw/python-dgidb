@@ -2,6 +2,20 @@ import requests
 import pandas as pd
 import json
 
+def get_drug(terms):
+
+    base_url  = 'http://localhost:3000/api/graphql'
+
+    if isinstance(terms,list):
+        terms = '\",\"'.join(terms)
+
+    query = "{\ndrugs(name: [\"" + terms.upper() + "\"]) {\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nid\n}\ndrugApplications {\nappNo\n}\n}\n}\n"
+
+    r = requests.post(base_url, json={'query': query})
+
+    data = __process_drug(r.json())
+
+    return(data)
 
 def get_interactions(terms,search):
 
@@ -42,6 +56,34 @@ def get_categories(terms):
     data = __process_gene_categories(r.json())
 
     return(data)
+
+def __process_drug(results):
+    drug_list = []
+    alias_list = []
+    attribute_list = []
+    antineoplastic_list = []
+    immunotherapy_list = []
+    approved_list = []
+
+    for match in results['data']['drugs']:
+        drug_list.append(match['name'])
+        alias_list.append("|".join([alias['alias'] for alias in match['drugAliases']]))
+        current_attributes = [": ".join([attribute['name'],attribute['value']]) for attribute in match['drugAttributes']]
+        attribute_list.append(" | ".join(current_attributes))
+        antineoplastic_list.append(str(match['antiNeoplastic']))
+        immunotherapy_list.append(str(match['immunotherapy']))
+        approved_list.append(str(match['approved']))
+
+    data = pd.DataFrame().assign(drug=drug_list,
+                                    aliases=alias_list,
+                                    attributes=attribute_list,
+                                    antineoplastic=antineoplastic_list,
+                                    immunotherapy=immunotherapy_list,
+                                    approved=approved_list)
+
+
+    return(data)
+
 
 def __process_gene_search(results):
     interactionscore_list = []
