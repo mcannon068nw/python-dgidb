@@ -38,6 +38,7 @@ def test_get_interactions():
     pass
 
 def test_get_categories():
+    """Test that categories works correctly"""
 
     # Categories search builds a dataframe
     query = 'braf'
