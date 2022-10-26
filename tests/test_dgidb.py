@@ -73,8 +73,6 @@ def test_get_categories():
 
     pass
 
-# TO DO: add test for get_drug
-
 def test_get_drugs():
     """Test that drug profile works correctly"""
 
