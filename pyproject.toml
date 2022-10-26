@@ -20,6 +20,3 @@ packages = ["dgidb"]
 [project.optional-dependencies]
 
 [project.scripts]
-
-
-i t
