@@ -13,10 +13,25 @@ def test_get_interactions():
         results = dgidb.get_interactions(query,search='fake')
     assert "Search type must be specified" in str(excinfo.value)
 
+    # Default search type functions correct as 'gene' and not 'drug'
+    query = 'imatinib'
+    results = dgidb.get_interactions(query)
+    assert len(results) == 0
+
+    # Use pandas default is correctly set to 'true'
+    query = 'braf'
+    results = dgidb.get_interactions(query)
+    assert type(results) == type(pd.DataFrame())
+
+    # Use pandas can be toggled to 'false' and returns a dictionary
+    query = 'braf'
+    results = dgidb.get_interactions(query,use_pandas=False)
+    assert type(results) != type(pd.DataFrame())
+    assert type(results) == type(dict())
+
     # Gene search types work correctly
     query = 'braf'
     results = dgidb.get_interactions(query,search='genes')
-    assert type(results) == type(pd.DataFrame())
     assert results.columns[0] == 'gene'
 
     # Gene search is not grabbing drugs
@@ -40,7 +55,7 @@ def test_get_interactions():
 def test_get_categories():
     """Test that categories works correctly"""
 
-    # Categories search builds a dataframe
+    # Categories search builds a dataframe (with use_pandas default set to 'true')
     query = 'braf'
     results = dgidb.get_categories(query)
     assert type(results) == type(pd.DataFrame())
@@ -50,4 +65,12 @@ def test_get_categories():
     results = dgidb.get_categories(query)
     assert len(results) == 0
 
+    # Use pandas can be toggled to 'false' and returns a dictionary
+    query = 'imatinib'
+    results = dgidb.get_categories(query,use_pandas=False)
+    assert type(results) != type(pd.DataFrame())
+    assert type(results) == type(dict())
+
     pass
+
+# TO DO: add test for get_drug
