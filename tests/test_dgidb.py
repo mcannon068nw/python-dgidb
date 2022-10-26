@@ -23,7 +23,7 @@ def test_get_interactions():
     results = dgidb.get_interactions(query)
     assert type(results) == type(pd.DataFrame())
 
-    # Use pandas can be toggled to 'false' and returns a dictionary
+    # Use pandas can be toggled to 'false' and returns a dictionary response object
     query = 'braf'
     results = dgidb.get_interactions(query,use_pandas=False)
     assert type(results) != type(pd.DataFrame())
@@ -65,7 +65,7 @@ def test_get_categories():
     results = dgidb.get_categories(query)
     assert len(results) == 0
 
-    # Use pandas can be toggled to 'false' and returns a dictionary
+    # Use pandas can be toggled to 'false' and returns a dictionary response object
     query = 'imatinib'
     results = dgidb.get_categories(query,use_pandas=False)
     assert type(results) != type(pd.DataFrame())
@@ -74,3 +74,24 @@ def test_get_categories():
     pass
 
 # TO DO: add test for get_drug
+
+def test_get_drugs():
+    """Test that drug profile works correctly"""
+
+    # Drug search builds a dataframe (with use_pandas default set to 'true')
+    query = 'imatinib'
+    results = dgidb.get_drug(query)
+    assert type(results) == type(pd.DataFrame())
+
+    # Drug search does not return gene data
+    query = 'braf'
+    results = dgidb.get_drug(query)
+    assert(len(results)) == 0
+
+    # Use pandas can be toggled to 'false' and returns dictionary response object
+    query = 'imatinib'
+    results = dgidb.get_drug(query,use_pandas=False)
+    assert type(results) != type(pd.DataFrame())
+    assert type(results) == type(dict())
+
+
