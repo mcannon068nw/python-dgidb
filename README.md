@@ -18,7 +18,20 @@ Currently supported searches:
     dgidb.get_interactions(terms, search='drugs', use_pandas=True)
 
 Search terms support list or string format inputs (e.g. terms=['BRAF','ABL1'] or terms='BRAF'). Interaction searches default to genes but can also accept drugs if search='drugs'.
-
+  
+Example usage:
+  
+    genes = ['BRAF','ABL1','BCR','PDGFRA']
+    drugs = ['IMATINIB','OLARATUMAB','DASATINIB','NELOTINIB']
+    
+    gene_interactions = dgidb.get_interactions(genes)
+    gene_categories = dgidb.get_categories(genes)
+    drug_interactions = dgidb.get_interactions(drugs,search='drugs')
+    drug_information = dgidb.get_drug(drugs)
+    
+    interaction_response_object = dgidb.get_interactions(genes, use_pandas=False)
+  
+  
 ## TO DO:
 - [ ] More parameter options for searches (i.e. approved, immunotherapy, antineoplastic)
 - [ ] Implement search for just gene information (similar to get_drug)
