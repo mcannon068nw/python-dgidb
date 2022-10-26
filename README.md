@@ -1,5 +1,5 @@
 # python-dgidb
-Python API for accessing DGIdb database. Currently supported searches will return individual interaction data for drugs or genes, category annotations for genes, or information for drugs.
+Python API for accessing a locally hosted DGIdb database. Currently supported searches will return individual interaction data for drugs or genes, category annotations for genes, or information for drugs.
 
 ## Using python-dgidb:
 python-dgidb must be imported first:
@@ -24,3 +24,4 @@ Search terms support list or string format inputs (e.g. terms=['BRAF','ABL1'] or
 - [ ] Implement search for just gene information (similar to get_drug)
 - [ ] Make drugApplications and appNo fields accessible for drug information
 - [ ] Implement metadata support (i.e. get_source)
+- [ ] Implement support for live dgidb (pending v5 launch date)
