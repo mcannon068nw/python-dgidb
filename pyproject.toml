@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools","setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-dgidb"
+description = "Python API for accessing DGIdb v5 database"
+readme = "README.md"
+requires-python = ">=3.10.4"
+keywords = ["dgidb"]
+dependencies = [
+    'requests',
+    'pandas<1.4.3'
+]
+dynamic = ["version"]
+
+[tool.setuptools]
+packages = ["dgidb"]
+
+[project.optional-dependencies]
+
+[project.scripts]
+
+
