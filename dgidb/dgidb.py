@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import json
 
-def get_drug(terms):
+def get_drug(terms,use_pandas=True):
 
     base_url  = 'http://localhost:3000/api/graphql'
 
@@ -13,11 +13,14 @@ def get_drug(terms):
 
     r = requests.post(base_url, json={'query': query})
 
-    data = __process_drug(r.json())
+    if use_pandas == True:
+        data = __process_drug(r.json())
+    elif use_pandas == False:
+        data = r.json()
 
     return(data)
 
-def get_interactions(terms,search):
+def get_interactions(terms,search='genes',use_pandas=True):
 
     base_url  = 'http://localhost:3000/api/graphql'
 
@@ -33,17 +36,20 @@ def get_interactions(terms,search):
 
     r = requests.post(base_url, json={'query': query})
 
+    if use_pandas == True:
+        if search == 'genes':
+            data = __process_gene_search(r.json())
+        elif search == 'drugs':
+            data = __process_drug_search(r.json())
+        else:
+            raise Exception("Search type must be specified using: search='drugs', or search='genes'")
 
-    if search == 'genes':
-        data = __process_gene_search(r.json())
-    elif search == 'drugs':
-        data = __process_drug_search(r.json())
-    else:
-        raise Exception("Search type must be specified using: search='drugs', or search='genes'")
+    elif use_pandas == False:
+        return(r.json())
 
     return(data)
 
-def get_categories(terms):
+def get_categories(terms,use_pandas=True):
 
     base_url  = 'http://localhost:3000/api/graphql'
 
@@ -53,7 +59,10 @@ def get_categories(terms):
     query = "{\ngenes(name: [\"" + terms.upper() + "\"]) {\nname\nlongName\ngeneCategoriesWithSources{\nname\nsourceNames\n}\n}\n}"
     r = requests.post(base_url, json={'query': query})
 
-    data = __process_gene_categories(r.json())
+    if use_pandas == True:
+        data = __process_gene_categories(r.json())
+    elif use_pandas == False:
+        data = r.json()
 
     return(data)
 
