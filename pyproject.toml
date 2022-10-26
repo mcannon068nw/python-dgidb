@@ -10,7 +10,7 @@ requires-python = ">=3.10.4"
 keywords = ["dgidb"]
 dependencies = [
     'requests',
-    'pandas<1.4.3'
+    'pandas>1.4.3'
 ]
 dynamic = ["version"]
 
@@ -22,3 +22,4 @@ packages = ["dgidb"]
 [project.scripts]
 
 
+i t
