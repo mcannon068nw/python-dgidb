@@ -28,9 +28,9 @@ def get_interactions(terms,search='genes',use_pandas=True):
         terms = '\",\"'.join(terms)
 
     if search == 'genes':
-        query = "{\ngenes(name: [\"" + terms.upper() + "\"]) {\nname\nlongName\ngeneCategories{\nname\n}\ninteractions {\ninteractionAttributes {\nname\nvalue\n}\ndrug {\nname\napproved\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}"
+        query = "{\ngenes(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\nlongName\ngeneCategories{\nname\n}\ninteractions {\ninteractionAttributes {\nname\nvalue\n}\ndrug {\nname\napproved\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     elif search == 'drugs':
-        query = "{\ndrugs(name: [\"" + terms.upper() + "\"]){\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}"
+        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]){\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     else:
         raise Exception("Search type must be specified using: search='drugs' or search='genes'")
 
@@ -103,21 +103,21 @@ def __process_gene_search(results):
     longname_list = []
     sources_list = []
     pmids_list = []
-    genecategories_list = []
+    # genecategories_list = []
 
     for match in results['data']['genes']:
         current_gene = match['name']
         current_longname = match['longName']
 
         # TO DO: Evaluate if categories should be returned as part of interactions search. Seems useful but also redundant?
-        list_string = []
-        for category in match['geneCategories']:
-            list_string.append(f"{category['name']}")
-        current_genecategories = " | ".join(list_string)
+        # list_string = []
+        # for category in match['geneCategories']:
+        #     list_string.append(f"{category['name']}")
+        # current_genecategories = " | ".join(list_string)
 
         for interaction in match['interactions']:
             gene_list.append(current_gene)
-            genecategories_list.append(current_genecategories)
+            # genecategories_list.append(current_genecategories)
             longname_list.append(current_longname)
             drugname_list.append(interaction['drug']['name'])
             approval_list.append(str(interaction['drug']['approved']))
@@ -139,7 +139,7 @@ def __process_gene_search(results):
 
     data = pd.DataFrame().assign(gene=gene_list,
                                             longname=longname_list,
-                                            categories=genecategories_list,
+                                            # categories=genecategories_list,
                                             drug=drugname_list,
                                             approval=approval_list,
                                             score=interactionscore_list,
