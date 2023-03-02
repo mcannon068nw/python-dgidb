@@ -9,7 +9,7 @@ def get_drug(terms,use_pandas=True):
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
 
-    query = "{\ndrugs(name: [\"" + terms.upper() + "\"]) {\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nid\n}\ndrugApplications {\nappNo\n}\n}\n}\n"
+    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nid\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
 
     r = requests.post(base_url, json={'query': query})
 
@@ -74,7 +74,7 @@ def __process_drug(results):
     immunotherapy_list = []
     approved_list = []
 
-    for match in results['data']['drugs']:
+    for match in results['data']['drugs']['nodes']:
         drug_list.append(match['name'])
         alias_list.append("|".join([alias['alias'] for alias in match['drugAliases']]))
         current_attributes = [": ".join([attribute['name'],attribute['value']]) for attribute in match['drugAttributes']]
@@ -105,7 +105,7 @@ def __process_gene_search(results):
     pmids_list = []
     # genecategories_list = []
 
-    for match in results['data']['genes']:
+    for match in results['data']['genes']['nodes']:
         current_gene = match['name']
         current_longname = match['longName']
 
@@ -154,7 +154,7 @@ def __process_gene_categories(results):
     sources_list = []
     longname_list = []
 
-    for match in results['data']['genes']:
+    for match in results['data']['genes']['nodes']:
         current_gene = match['name']
         current_longname = match['longName']
 
@@ -183,7 +183,7 @@ def __process_drug_search(results):
     sources_list = []
     pmids_list = []
 
-    for match in results['data']['drugs']:
+    for match in results['data']['drugs']['nodes']:
         current_drug = match['name']
         current_approval = (str(match['approved']))
 
