@@ -56,7 +56,7 @@ def get_categories(terms,use_pandas=True):
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
 
-    query = "{\ngenes(name: [\"" + terms.upper() + "\"]) {\nname\nlongName\ngeneCategoriesWithSources{\nname\nsourceNames\n}\n}\n}"
+    query = "{\ngenes(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\nlongName\ngeneCategoriesWithSources{\nname\nsourceNames\n}\n}\n}\n}"
     r = requests.post(base_url, json={'query': query})
 
     if use_pandas == True:
