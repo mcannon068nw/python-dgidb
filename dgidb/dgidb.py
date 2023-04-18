@@ -33,6 +33,23 @@ def get_drug(terms,use_pandas=True):
 
     return(data)
 
+def get_gene(terms,use_pandas=True):
+
+    if isinstance(terms,list):
+        terms = '\",\"'.join(terms)
+
+    query = "{\ngenes(names: [\"" + terms.upper() +"\"]) {\nnodes\n{name\nlongName\nconceptId\ngeneAliases {\nalias\n}\ngeneAttributes {\nname\nvalue\n}\n}\n}\n}"
+
+    r = requests.post(base_url, json={'query': query})
+
+    if use_pandas == True:
+        data = r.json() # TODO: create __process_gene() method
+    elif use_pandas == False:
+        data = r.json()
+
+    return(data)
+
+
 def get_interactions(terms,search='genes',use_pandas=True):
 
     if isinstance(terms,list):
