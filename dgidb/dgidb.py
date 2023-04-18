@@ -22,7 +22,7 @@ def get_drug(terms,use_pandas=True):
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
 
-    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nid\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
+    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nrating\nsource {\nsourceDbName\n}\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
 
     r = requests.post(base_url, json={'query': query})
 
@@ -99,6 +99,8 @@ def __process_drug(results):
     antineoplastic_list = []
     immunotherapy_list = []
     approved_list = []
+    rating_list = []
+    application_list = []
 
     for match in results['data']['drugs']['nodes']:
         drug_list.append(match['name'])
@@ -108,13 +110,18 @@ def __process_drug(results):
         antineoplastic_list.append(str(match['antiNeoplastic']))
         immunotherapy_list.append(str(match['immunotherapy']))
         approved_list.append(str(match['approved']))
+        application_list.append("|".join(app['appNo'] for app in match['drugApplications']))
+        current_ratings = [": ".join([rating['source']['sourceDbName'],rating['rating']]) for rating in match['drugApprovalRatings']]
+        rating_list.append(" | ".join(current_ratings))
 
     data = pd.DataFrame().assign(drug=drug_list,
                                     aliases=alias_list,
                                     attributes=attribute_list,
                                     antineoplastic=antineoplastic_list,
                                     immunotherapy=immunotherapy_list,
-                                    approved=approved_list)
+                                    approved=approved_list,
+                                    approval_ratings=rating_list,
+                                    applications=application_list)
 
 
     return(data)
