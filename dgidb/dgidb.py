@@ -2,9 +2,22 @@ import requests
 import pandas as pd
 import json
 
-def get_drug(terms,use_pandas=True):
+# TODO: learn how to implement global variables to reflect which API end point to use
+def __api_url(env='local'):
 
-    base_url  = 'http://localhost:3000/api/graphql'
+    url = 'http://localhost:3000/api/graphql'
+
+    if env == 'local':
+        url = 'http://localhost:3000/api/graphql'
+
+    if env == 'staging':
+        url = 'https://staging.dgidb.org/api/graphql'
+
+    return(url)
+
+base_url = __api_url('staging')
+
+def get_drug(terms,use_pandas=True):
 
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
@@ -21,8 +34,6 @@ def get_drug(terms,use_pandas=True):
     return(data)
 
 def get_interactions(terms,search='genes',use_pandas=True):
-
-    base_url  = 'http://localhost:3000/api/graphql'
 
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
@@ -50,8 +61,6 @@ def get_interactions(terms,search='genes',use_pandas=True):
     return(data)
 
 def get_categories(terms,use_pandas=True):
-
-    base_url  = 'http://localhost:3000/api/graphql'
 
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
