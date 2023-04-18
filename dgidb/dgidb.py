@@ -23,7 +23,10 @@ def format_filters(filter_dict):
 
     for key in keys:
         if filter_dict[key] != None:
-            filter_string = filter_string + f', {key}: {str(filter_dict[key]).lower()}'
+            value = str(filter_dict[key]).lower() if type(filter_dict[key]) is bool else f'\"{filter_dict[key]}\"'
+            # TO DO: catch for PMID?
+            filter_string = filter_string + f', {key}: {value}'
+            print(filter_string)
         else:
             pass
 
@@ -65,15 +68,26 @@ def get_gene(terms,use_pandas=True):
     return(data)
 
 
-def get_interactions(terms,search='genes',use_pandas=True):
+def get_interactions(terms,search='genes',use_pandas=True,immunotherapy=None,antineoplastic=None,sourcedbname=None,pmid=None,interactiontype=None,approved=None):
 
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
 
     if search == 'genes':
-        query = "{\ngenes(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\nlongName\ngeneCategories{\nname\n}\ninteractions {\ninteractionAttributes {\nname\nvalue\n}\ndrug {\nname\napproved\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
+        immunotherapy = None
+        antineoplastic = None
+
+    filters = format_filters({"immunotherapy": immunotherapy,
+                            "antiNeoplastic": antineoplastic,
+                            "sourceDbName": sourcedbname,
+                            "pmid": pmid,
+                            "interactiontype": interactiontype,
+                            "approved": approved})
+
+    if search == 'genes':
+        query = "{\ngenes(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\nlongName\ngeneCategories{\nname\n}\ninteractions {\ninteractionAttributes {\nname\nvalue\n}\ndrug {\nname\napproved\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     elif search == 'drugs':
-        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]){\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
+        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + "){\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     else:
         raise Exception("Search type must be specified using: search='drugs' or search='genes'")
 
