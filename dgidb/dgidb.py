@@ -17,12 +17,27 @@ def __api_url(env='local'):
 
 base_url = __api_url('staging')
 
-def get_drug(terms,use_pandas=True):
+def format_filters(filter_dict):
+    keys = [k for k in filter_dict]
+    filter_string = ""
+
+    for key in keys:
+        if filter_dict[key] != None:
+            filter_string = filter_string + f', {key}: {str(filter_dict[key]).lower()}'
+        else:
+            pass
+
+    return(filter_string)
+
+def get_drug(terms,use_pandas=True,immunotherapy=None,antineoplastic=None):
 
     if isinstance(terms,list):
         terms = '\",\"'.join(terms)
 
-    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nrating\nsource {\nsourceDbName\n}\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
+    filters = format_filters({"immunotherapy": immunotherapy,
+                                "antiNeoplastic": antineoplastic})
+
+    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nrating\nsource {\nsourceDbName\n}\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
 
     r = requests.post(base_url, json={'query': query})
 
