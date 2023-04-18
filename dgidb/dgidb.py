@@ -43,7 +43,7 @@ def get_gene(terms,use_pandas=True):
     r = requests.post(base_url, json={'query': query})
 
     if use_pandas == True:
-        data = r.json() # TODO: create __process_gene() method
+        data = __process_gene(r.json()) # TODO: create __process_gene() method
     elif use_pandas == False:
         data = r.json()
 
@@ -119,6 +119,27 @@ def __process_drug(results):
 
     return(data)
 
+def __process_gene(results):
+    gene_list = []
+    alias_list = []
+    concept_list = []
+    attribute_list = []
+
+
+    for match in results['data']['genes']['nodes']:
+        gene_list.append(match['name'])
+        alias_list.append("|".join([alias['alias'] for alias in match['geneAliases']]))
+        current_attributes = [": ".join([attribute['name'],attribute['value']]) for attribute in match['geneAttributes']]
+        attribute_list.append(" | ".join(current_attributes))
+        concept_list.append(match['conceptId'])
+
+    data = pd.DataFrame().assign(gene=gene_list,
+                                    concept_id=concept_list,
+                                    aliases=alias_list,
+                                    attributes=attribute_list
+                                    )
+
+    return(data)
 
 def __process_gene_search(results):
     interactionscore_list = []
