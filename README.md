@@ -35,6 +35,6 @@ Example usage:
 ## TO DO:
 - [ ] More parameter options for searches (i.e. approved, immunotherapy, antineoplastic)
 - [x] Implement search for just gene information (similar to get_drug)
-- [ ] Make drugApplications and appNo fields accessible for drug information
+- [x] Make drugApplications and appNo fields accessible for drug information
 - [ ] Implement metadata support (i.e. get_source)
 - [ ] Implement support for live dgidb (pending v5 launch date)
