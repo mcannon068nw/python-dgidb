@@ -33,7 +33,7 @@ Example usage:
   
   
 ## TO DO:
-- [ ] More parameter options for searches (i.e. approved, immunotherapy, antineoplastic)
+- [x] More parameter options for searches (i.e. approved, immunotherapy, antineoplastic)
 - [x] Implement search for just gene information (similar to get_drug)
 - [x] Make drugApplications and appNo fields accessible for drug information
 - [ ] Implement metadata support (i.e. get_source)
