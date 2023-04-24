@@ -121,6 +121,24 @@ def get_categories(terms,use_pandas=True):
 
     return(data)
 
+def get_source(type='all'):
+
+    valid_types = ['all','drug','gene','interaction','potentially_druggable']
+
+    if type.lower() not in valid_types:
+        raise Exception("Type must be a valid source type: drug, gene, interaction, potentially_druggable")
+
+    if type == 'all':
+        query = "{\nsources {\nnodes {\nfullName\nsourceDbName\nsourceDbVersion\ndrugClaimsCount\ngeneClaimsCount\ninteractionClaimsCount\n}\n}\n}"
+
+    else:
+        query = "{\nsources(sourceType: " + type.upper() + ") {\nnodes {\nfullName\nsourceDbName\nsourceDbVersion\ndrugClaimsCount\ngeneClaimsCount\ninteractionClaimsCount\n}\n}\n}"
+
+    r = requests.post(base_url, json={'query': query})
+    data = r.json()
+
+    return(data)
+
 def __process_drug(results):
     drug_list = []
     concept_list = []
