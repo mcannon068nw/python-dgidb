@@ -221,9 +221,9 @@ def __process_gene_search(results):
             pmids_list.append(" | ".join(sub_list_string))
 
     data = pd.DataFrame().assign(gene=gene_list,
+                                            drug=drugname_list,
                                             longname=longname_list,
                                             # categories=genecategories_list,
-                                            drug=drugname_list,
                                             approval=approval_list,
                                             score=interactionscore_list,
                                             interaction_attributes=interactionattributes_list,
