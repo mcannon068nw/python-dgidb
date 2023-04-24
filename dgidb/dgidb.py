@@ -40,7 +40,7 @@ def get_drug(terms,use_pandas=True,immunotherapy=None,antineoplastic=None):
     filters = format_filters({"immunotherapy": immunotherapy,
                                 "antiNeoplastic": antineoplastic})
 
-    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nrating\nsource {\nsourceDbName\n}\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
+    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\nconceptId\ndrugAliases {\nalias\n}\ndrugAttributes {\nname\nvalue\n}\nantiNeoplastic\nimmunotherapy\napproved\ndrugApprovalRatings {\nrating\nsource {\nsourceDbName\n}\n}\ndrugApplications {\nappNo\n}\n}\n}\n}\n"
 
     r = requests.post(base_url, json={'query': query})
 
@@ -123,6 +123,7 @@ def get_categories(terms,use_pandas=True):
 
 def __process_drug(results):
     drug_list = []
+    concept_list = []
     alias_list = []
     attribute_list = []
     antineoplastic_list = []
@@ -133,6 +134,7 @@ def __process_drug(results):
 
     for match in results['data']['drugs']['nodes']:
         drug_list.append(match['name'])
+        concept_list.append(match['conceptId'])
         alias_list.append("|".join([alias['alias'] for alias in match['drugAliases']]))
         current_attributes = [": ".join([attribute['name'],attribute['value']]) for attribute in match['drugAttributes']]
         attribute_list.append(" | ".join(current_attributes))
@@ -144,6 +146,7 @@ def __process_drug(results):
         rating_list.append(" | ".join(current_ratings))
 
     data = pd.DataFrame().assign(drug=drug_list,
+                                    concept_id=concept_list,
                                     aliases=alias_list,
                                     attributes=attribute_list,
                                     antineoplastic=antineoplastic_list,
