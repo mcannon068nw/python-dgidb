@@ -2,7 +2,6 @@ from dgidb import dgidb
 import requests
 import pandas as pd
 import pytest
-import networkx as nx
 
 def test_get_interactions():
     """Test that interactions works correctly"""
