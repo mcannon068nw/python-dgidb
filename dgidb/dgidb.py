@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 import json
+import networkx as nx
+import matplotlib.pyplot as plt
 
 # TODO: learn how to implement global variables to reflect which API end point to use
 def __api_url(env='local'):
@@ -233,6 +235,7 @@ def __process_gene_search(results):
             interactionattributes_list.append(" | ".join(list_string))
 
             list_string = []
+            sub_list_string = []
             for claim in interaction['interactionClaims']:
                 list_string.append(f"{claim['source']['fullName']}")
                 sub_list_string = []
@@ -304,6 +307,7 @@ def __process_drug_search(results):
             interactionattributes_list.append("| ".join(list_string))
 
             list_string = []
+            sub_list_string = []
             for claim in interaction['interactionClaims']:
                 list_string.append(f"{claim['source']['fullName']}")
                 sub_list_string = []
@@ -321,3 +325,22 @@ def __process_drug_search(results):
                                 source=sources_list,
                                 pmid=pmids_list)
     return(data)
+
+def create_gene_interactions_network(interactions):
+    # Initalize Interactions Graph
+    interactions_graph = nx.Graph()
+    for int_gene, int_drug in zip(interactions['drug'], interactions['gene']):
+        interactions_graph.add_node(int_gene)
+        interactions_graph.add_node(int_drug)
+        interactions_graph.add_edge(int_gene,int_drug)
+    # Draw Interactions Graph
+    nx.draw(interactions_graph, 
+            node_size = 1, 
+            width = 0.05,
+            edge_color='gray', 
+            with_labels=True, 
+            arrows=True,
+            arrowstyle='-|>',
+            arrowsize=2,
+            font_size=0.1)
+    plt.savefig("graph.jpg", dpi=3000)
