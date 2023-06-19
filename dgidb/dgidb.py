@@ -4,7 +4,7 @@ import json
 import networkx as nx
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull as ch
-
+import random
 # TODO: learn how to implement global variables to reflect which API end point to use
 def __api_url(env='local'):
 
@@ -62,7 +62,7 @@ def get_gene(terms,use_pandas=True):
     query = "{\ngenes(names: [\"" + terms.upper() +"\"]) {\nnodes\n{name\nlongName\nconceptId\ngeneAliases {\nalias\n}\ngeneAttributes {\nname\nvalue\n}\n}\n}\n}"
 
     r = requests.post(base_url, json={'query': query})
-
+    
     if use_pandas == True:
         data = __process_gene(r.json()) # TODO: create __process_gene() method
     elif use_pandas == False:
@@ -90,10 +90,11 @@ def get_interactions(terms,search='genes',use_pandas=True,immunotherapy=None,ant
     if search == 'genes':
         query = "{\ngenes(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\nlongName\ngeneCategories{\nname\n}\ninteractions {\ninteractionAttributes {\nname\nvalue\n}\ndrug {\nname\napproved\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     elif search == 'drugs':
-        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + "){\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
+        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     else:
         raise Exception("Search type must be specified using: search='drugs' or search='genes'")
 
+    #print(query)
     r = requests.post(base_url, json={'query': query})
 
     if use_pandas == True:
@@ -330,7 +331,7 @@ def __process_drug_search(results):
 def create_gene_interactions_network(interactions):
     # Initalize Interactions Graph
     interactions_graph = nx.Graph()
-    for int_gene, int_drug, int_score in zip(interactions['drug'], interactions['gene'], interactions['score']):
+    for int_gene, int_drug, int_score in zip(interactions['gene'], interactions['drug'], interactions['score']):
         interactions_graph.add_node(int_gene,connections=0,isGene=True)
         interactions_graph.add_node(int_drug,connections=0,isGene=False)
         interactions_graph.add_edge(int_gene,int_drug)
@@ -341,46 +342,65 @@ def create_gene_interactions_network(interactions):
     for node in interactions_graph.nodes:
         num_edges = interactions_graph.nodes[node]['connections']
         is_gene = interactions_graph.nodes[node]['isGene']
-        set_color = ""
-        set_size = 1
         if(is_gene):
-            if(num_edges > 1):
-                set_color = "orange"
-                set_size = 5
-            else: 
-                set_color = "red"
-        else:
             if(num_edges > 1):
                 set_color = "cyan"
                 set_size = 10
             else: 
                 set_color = "blue"
+        else:
+            if(num_edges > 1):
+                set_color = "orange"
+                set_size = 5
+            else: 
+                set_color = "red"
         interactions_graph.nodes[node]['color'] = set_color
         interactions_graph.nodes[node]['node_size'] = set_size
     node_colors = [interactions_graph.nodes[node]['color'] for node in interactions_graph.nodes()]
     node_sizes = [interactions_graph.nodes[node]['node_size'] for node in interactions_graph.nodes()]
+    # Create Sub-Graphs
+    subgraphs = []
+    for node in interactions_graph.nodes:
+        node_isGene = interactions_graph.nodes[node]['isGene']
+        if(node_isGene):
+            node_neighbors = nx.all_neighbors(interactions_graph, node)
+            subgraph_node_list1 = [node]
+            subgraph_node_list2 = [node]
+            for neighbor in node_neighbors:
+                neighbor_connections = interactions_graph.nodes[neighbor]['connections']
+                if(neighbor_connections == 1):
+                    subgraph_node_list1.append(neighbor)
+                if(neighbor_connections > 1):
+                    subgraph_node_list2.append(neighbor)
+            subgraph1 = interactions_graph.subgraph(subgraph_node_list1)
+            subgraph2 = interactions_graph.subgraph(subgraph_node_list2)
+            subgraphs.append(subgraph1)
+            subgraphs.append(subgraph2)
     # Draw Interactions Graph
-    pos = nx.spring_layout(interactions_graph,seed=1)
-    nx.draw(interactions_graph, 
-            pos=pos,
-            node_size=node_sizes, 
-            node_color=node_colors,
-            width=0.05,
-            edge_color='gray', 
-            with_labels=True, 
-            arrows=True,
-            arrowstyle='-|>',
-            arrowsize=2,
-            font_size=0.1)
+    pos = nx.spring_layout(interactions_graph,seed=7)
+    for subgraph in subgraphs:
+        nx.draw(subgraph, 
+                pos=pos,
+                node_size=node_sizes, 
+                node_color=node_colors,
+                width=0.05,
+                edge_color='gray', 
+                with_labels=True, 
+                arrows=True,
+                arrowstyle='-|>',
+                arrowsize=2,
+                font_size=0.1)
     # Convex Hull Code
-    test_node_group = list(interactions_graph.nodes())[:20]
-    convexhull = ch([pos[node] for node in test_node_group])
-    convex_hull_nodes = [test_node_group[i] for i in convexhull.vertices]
-
-    polygon = plt.Polygon(
-        [pos[node] for node in convex_hull_nodes],
-        edgecolor='darkgreen', facecolor='none', 
-        linewidth=0.5)
-    plt.gca().add_patch(polygon)
-
+    colors = ["red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black"]
+    for subgraph in subgraphs:
+        node_group = list(subgraph.nodes())
+        convexhull = ch([pos[node] for node in node_group])
+        convex_hull_nodes = [node_group[i] for i in convexhull.vertices]
+        rand_color = random.choice(colors)
+        polygon = plt.Polygon(
+            [pos[node] for node in convex_hull_nodes],
+            edgecolor=rand_color, facecolor=rand_color, 
+            alpha=0.5, linewidth=1)
+        plt.gca().add_patch(polygon)
+    # Save Graph
     plt.savefig("graph.jpg", dpi=3000)
