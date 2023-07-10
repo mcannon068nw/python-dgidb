@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull as ch
+import plotly.graph_objects as go
 
 def initalize_network(interactions):
     interactions_graph = nx.Graph()
@@ -32,7 +33,7 @@ def add_node_attribute(interactions_graph):
                 set_size = 5
             else: 
                 set_color = "red"
-        interactions_graph.nodes[node]['color'] = set_color
+        interactions_graph.nodes[node]['node_color'] = set_color
         interactions_graph.nodes[node]['node_size'] = set_size
 
 def create_sub_graphs(interactions_graph):
@@ -56,7 +57,7 @@ def create_sub_graphs(interactions_graph):
     return subgraphs
             
 def draw_graph(interactions_graph,pos):
-    node_colors = [interactions_graph.nodes[node]['color'] for node in interactions_graph.nodes()]
+    node_colors = [interactions_graph.nodes[node]['node_color'] for node in interactions_graph.nodes()]
     node_sizes = [interactions_graph.nodes[node]['node_size'] for node in interactions_graph.nodes()]
     nx.draw(interactions_graph, 
             pos=pos,
@@ -89,7 +90,61 @@ def create_network(interactions):
     layout = nx.spring_layout(interactions_graph,seed=7)
     draw_graph(interactions_graph,layout)
     draw_convex_hull(interactions_graph,layout)
+    return interactions_graph
     
 def save_graph():
     plt.savefig("graph.jpg", dpi=3000)
     
+def generate_plotly(graph):
+    pos = nx.spring_layout(graph, seed=7)
+
+    node_x = []
+    node_y = []
+    node_text = []
+    for node in graph.nodes():
+        x, y = pos[node]
+        node_x.append(x)
+        node_y.append(y)
+        node_text.append(str(node))
+    
+    trace_nodes = go.Scatter(
+        x=node_x,
+        y=node_y,
+        mode='markers',
+        marker=dict(
+            symbol='circle',
+            size=10,
+            color='blue'
+        ),
+        text=node_text,
+        hoverinfo='text'
+    )
+
+    edge_x = []
+    edge_y = []
+    for edge in graph.edges():
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
+        edge_x.append(x0)
+        edge_x.append(x1)
+        edge_x.append(None)
+        edge_y.append(y0)
+        edge_y.append(y1)
+        edge_y.append(None)
+
+    trace_edges = go.Scatter(
+        x=edge_x,
+        y=edge_y,
+        mode='lines',
+        hoverinfo='none'
+    )
+
+    layout = go.Layout(
+        showlegend=False,
+        hovermode='closest',
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+    )
+
+    fig = go.Figure(data=[trace_edges, trace_nodes], layout=layout)
+    return fig
