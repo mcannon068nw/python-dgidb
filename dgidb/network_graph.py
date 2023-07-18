@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull as ch
 import plotly.graph_objects as go
+import matplotlib.colors as mcolors
 
 def initalize_network(interactions):
     interactions_graph = nx.Graph()
@@ -98,6 +99,26 @@ def save_graph():
 def generate_plotly(graph):
     pos = nx.spring_layout(graph, seed=7)
 
+    trace_nodes = create_trace_nodes(graph,pos)
+    trace_edges = create_trace_edges(graph,pos)
+    trace_convex_hulls = create_trace_convex_hulls(graph,pos)
+
+    layout = go.Layout(
+        showlegend=False,
+        hovermode='closest',
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+    )
+
+    fig = go.Figure(layout=layout)
+    fig.add_trace(trace_edges)
+    for trace_convex_hull in trace_convex_hulls:
+        fig.add_trace(trace_convex_hull)
+    fig.add_trace(trace_nodes)
+
+    return fig
+
+def create_trace_nodes(graph,pos):
     node_x = []
     node_y = []
     node_text = []
@@ -106,6 +127,9 @@ def generate_plotly(graph):
         node_x.append(x)
         node_y.append(y)
         node_text.append(str(node))
+
+    node_colors = [graph.nodes[node]['node_color'] for node in graph.nodes()]
+    node_sizes = [graph.nodes[node]['node_size'] for node in graph.nodes()]
     
     trace_nodes = go.Scatter(
         x=node_x,
@@ -113,13 +137,16 @@ def generate_plotly(graph):
         mode='markers',
         marker=dict(
             symbol='circle',
-            size=10,
-            color='blue'
+            size=7,
+            color=node_colors
         ),
         text=node_text,
         hoverinfo='text'
     )
 
+    return trace_nodes
+
+def create_trace_edges(graph,pos):
     edge_x = []
     edge_y = []
     for edge in graph.edges():
@@ -136,15 +163,36 @@ def generate_plotly(graph):
         x=edge_x,
         y=edge_y,
         mode='lines',
+        line=dict(width=1,color='gray'),
         hoverinfo='none'
     )
 
-    layout = go.Layout(
-        showlegend=False,
-        hovermode='closest',
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
-    )
+    return trace_edges
 
-    fig = go.Figure(data=[trace_edges, trace_nodes], layout=layout)
-    return fig
+def create_trace_convex_hulls(graph,pos):
+    trace_convex_hulls = []
+    subgraphs = create_sub_graphs(graph)
+    color_list = ["Red", "Orange", "Yellow", "Lime", "Green", "Aquamarine", "Cyan", "Indigo"]
+    for subgraph, color in zip(subgraphs, color_list):
+        points = [pos[node] for node in list(subgraph.nodes())]
+
+        hull = ch(points)
+        hull_vertices = hull.vertices.tolist()
+        hull_vertices.append(hull_vertices[0])
+
+        hull_x = [points[i][0] for i in hull_vertices]
+        hull_y = [points[i][1] for i in hull_vertices]
+
+        trace_convex_hull = go.Scatter(x=hull_x, 
+                                       y=hull_y, 
+                                       mode='none', 
+                                       fill='toself', 
+                                       fillcolor=add_opacity_to_color(color), 
+                                       hoverinfo='none')
+        trace_convex_hulls.append(trace_convex_hull)
+        
+    return trace_convex_hulls
+
+def add_opacity_to_color(color_name, alpha=0.5):
+    rgba = mcolors.to_rgba(color_name)
+    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {alpha})"
