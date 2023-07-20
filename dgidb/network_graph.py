@@ -89,8 +89,8 @@ def create_network(interactions):
     interactions_graph = initalize_network(interactions)
     add_attributes(interactions_graph)
     layout = nx.spring_layout(interactions_graph,seed=7)
-    draw_graph(interactions_graph,layout)
-    draw_convex_hull(interactions_graph,layout)
+    #draw_graph(interactions_graph,layout)
+    #draw_convex_hull(interactions_graph,layout)
     return interactions_graph
     
 def save_graph():
@@ -130,7 +130,7 @@ def create_trace_nodes(graph,pos):
 
     node_colors = [graph.nodes[node]['node_color'] for node in graph.nodes()]
     node_sizes = [graph.nodes[node]['node_size'] for node in graph.nodes()]
-    
+
     trace_nodes = go.Scatter(
         x=node_x,
         y=node_y,
@@ -141,7 +141,8 @@ def create_trace_nodes(graph,pos):
             color=node_colors
         ),
         text=node_text,
-        hoverinfo='text'
+        hoverinfo='text',
+        visible=True
     )
 
     return trace_nodes
