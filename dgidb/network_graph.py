@@ -96,12 +96,15 @@ def create_network(interactions):
 def save_graph():
     plt.savefig("graph.jpg", dpi=3000)
     
-def generate_plotly(graph):
+def generate_plotly(graph,isNotSubgraph=True):
     pos = nx.spring_layout(graph, seed=7)
 
     trace_nodes = create_trace_nodes(graph,pos)
     trace_edges = create_trace_edges(graph,pos)
-    trace_convex_hulls = create_trace_convex_hulls(graph,pos)
+    if(isNotSubgraph):
+        trace_convex_hulls = create_trace_convex_hulls(graph,pos)
+    else:
+        trace_convex_hulls = []
 
     layout = go.Layout(
         showlegend=False,
@@ -174,26 +177,36 @@ def create_trace_convex_hulls(graph,pos):
     trace_convex_hulls = []
     subgraphs = create_sub_graphs(graph)
     color_list = ["Red", "Orange", "Yellow", "Lime", "Green", "Aquamarine", "Cyan", "Indigo"]
-    for subgraph, color in zip(subgraphs, color_list):
-        points = [pos[node] for node in list(subgraph.nodes())]
+    try:
+        for subgraph, color in zip(subgraphs, color_list):
+            points = [pos[node] for node in list(subgraph.nodes())]
 
-        hull = ch(points)
-        hull_vertices = hull.vertices.tolist()
-        hull_vertices.append(hull_vertices[0])
+            hull = ch(points)
+            hull_vertices = hull.vertices.tolist()
+            hull_vertices.append(hull_vertices[0])
 
-        hull_x = [points[i][0] for i in hull_vertices]
-        hull_y = [points[i][1] for i in hull_vertices]
+            hull_x = [points[i][0] for i in hull_vertices]
+            hull_y = [points[i][1] for i in hull_vertices]
 
-        trace_convex_hull = go.Scatter(x=hull_x, 
-                                       y=hull_y, 
-                                       mode='none', 
-                                       fill='toself', 
-                                       fillcolor=add_opacity_to_color(color), 
-                                       hoverinfo='none')
-        trace_convex_hulls.append(trace_convex_hull)
-        
+            trace_convex_hull = go.Scatter(x=hull_x, 
+                                        y=hull_y, 
+                                        mode='none', 
+                                        fill='toself', 
+                                        fillcolor=add_opacity_to_color(color), 
+                                        hoverinfo='none')
+            trace_convex_hulls.append(trace_convex_hull)
+    except Exception:
+        pass
     return trace_convex_hulls
 
 def add_opacity_to_color(color_name, alpha=0.5):
     rgba = mcolors.to_rgba(color_name)
     return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {alpha})"
+
+def generate_subgraph_plotly(graph,value):
+    node_set = set([value])
+    neighbors = graph.neighbors(value)
+    for neighbor in neighbors:
+        node_set.add(neighbor)
+    subgraph = graph.subgraph(list(node_set))
+    return generate_plotly(subgraph,False)

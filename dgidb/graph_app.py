@@ -24,7 +24,7 @@ def generate_app():
 
     define_layout(app,graph,plot)
     select_from_graph(app)
-    #filter_from_dropdown(app,graph)
+    filter_from_dropdown(app,graph)
 
     if(__name__ == '__main__'):
         app.run_server(debug=True)
@@ -39,7 +39,7 @@ def define_layout(app,graph,plot):
     dropdown_display = dcc.Dropdown(
         id='node-dropdown',
         options=[{'label': node, 'value': node} for node in graph.nodes],
-        multi=True
+        multi=False
     )
 
     app.layout = html.Div([
@@ -50,7 +50,7 @@ def define_layout(app,graph,plot):
                     body=True,
                     style={'margin': '10px'}
                 ),
-                width=9
+                width=8
             ),
             dbc.Col(
                 dbc.Card(
@@ -58,7 +58,7 @@ def define_layout(app,graph,plot):
                     body=True,
                     style={'margin': '10px'}
                 ),
-                width=3
+                width=4
             )
         ])
     ])
@@ -74,3 +74,13 @@ def select_from_graph(app):
             selected_node_name = selected_node.get('text', '')
             return selected_node_name
         return dash.no_update
+    
+def filter_from_dropdown(app,graph):
+    @app.callback(
+        Output('network-graph', 'figure'),
+        [Input('node-dropdown', 'value')]
+    )
+    def update(value):
+        if(value is not None):
+            return ng.generate_subgraph_plotly(graph,value)
+        return ng.generate_plotly(graph)
