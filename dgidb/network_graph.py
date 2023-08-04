@@ -96,57 +96,75 @@ def create_network(interactions):
 def save_graph():
     plt.savefig("graph.jpg", dpi=3000)
     
-def generate_plotly(graph,isNotSubgraph=True):
-    pos = nx.spring_layout(graph, seed=7)
-
-    trace_nodes = create_trace_nodes(graph,pos)
-    trace_edges = create_trace_edges(graph,pos)
-    if(isNotSubgraph):
-        trace_convex_hulls = create_trace_convex_hulls(graph,pos)
-    else:
-        trace_convex_hulls = []
-
+def generate_plotly(graph):
     layout = go.Layout(
-        showlegend=False,
         hovermode='closest',
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
     )
-
     fig = go.Figure(layout=layout)
-    fig.add_trace(trace_edges)
-    for trace_convex_hull in trace_convex_hulls:
-        fig.add_trace(trace_convex_hull)
-    fig.add_trace(trace_nodes)
+    
+    if(graph is not None):
+        pos = nx.spring_layout(graph, seed=7)
+
+        trace_nodes = create_trace_nodes(graph,pos)
+        trace_edges = create_trace_edges(graph,pos)
+        #trace_convex_hulls = create_trace_convex_hulls(graph,pos)
+
+        fig.add_trace(trace_edges)
+        #for trace_convex_hull in trace_convex_hulls:
+            #fig.add_trace(trace_convex_hull)
+        for trace_group in trace_nodes:
+            fig.add_trace(trace_group)
 
     return fig
 
 def create_trace_nodes(graph,pos):
-    node_x = []
-    node_y = []
-    node_text = []
+    trace_nodes = []
+    
+    nodes_by_group = {
+        'cyan': {'node_x': [], 'node_y': [], 'node_text': [], 'node_colors': []},
+        'orange': {'node_x': [], 'node_y': [], 'node_text': [], 'node_colors': []},
+        'red': {'node_x': [], 'node_y': [], 'node_text': [], 'node_colors': []}
+    }
+
     for node in graph.nodes():
+        node_color = graph.nodes[node]['node_color']
+        node_size = graph.nodes[node]['node_size']
         x, y = pos[node]
-        node_x.append(x)
-        node_y.append(y)
-        node_text.append(str(node))
+        if(node_color == "cyan"):
+            nodes_by_group['cyan']['node_x'].append(x)
+            nodes_by_group['cyan']['node_y'].append(y)
+            nodes_by_group['cyan']['node_text'].append(str(node))
+            nodes_by_group['cyan']['node_colors'].append(node_color)
+        if(node_color == "orange"):
+            nodes_by_group['orange']['node_x'].append(x)
+            nodes_by_group['orange']['node_y'].append(y)
+            nodes_by_group['orange']['node_text'].append(str(node))
+            nodes_by_group['orange']['node_colors'].append(node_color)
+        if(node_color == "red"):
+            nodes_by_group['red']['node_x'].append(x)
+            nodes_by_group['red']['node_y'].append(y)
+            nodes_by_group['red']['node_text'].append(str(node))
+            nodes_by_group['red']['node_colors'].append(node_color)
 
-    node_colors = [graph.nodes[node]['node_color'] for node in graph.nodes()]
-    node_sizes = [graph.nodes[node]['node_size'] for node in graph.nodes()]
-
-    trace_nodes = go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode='markers',
-        marker=dict(
-            symbol='circle',
-            size=7,
-            color=node_colors
-        ),
-        text=node_text,
-        hoverinfo='text',
-        visible=True
-    )
+    for key,value in nodes_by_group.items():
+        trace_group = go.Scatter(
+            x=value['node_x'],
+            y=value['node_y'],
+            mode='markers',
+            marker=dict(
+                symbol='circle',
+                size=7,
+                color=value['node_colors']
+            ),
+            text=value['node_text'],
+            hoverinfo='text',
+            visible=True,
+            showlegend=True,
+            name=key
+        )
+        trace_nodes.append(trace_group)
 
     return trace_nodes
 
@@ -168,7 +186,8 @@ def create_trace_edges(graph,pos):
         y=edge_y,
         mode='lines',
         line=dict(width=1,color='gray'),
-        hoverinfo='none'
+        hoverinfo='none',
+        showlegend=False
     )
 
     return trace_edges
@@ -193,7 +212,8 @@ def create_trace_convex_hulls(graph,pos):
                                         mode='none', 
                                         fill='toself', 
                                         fillcolor=add_opacity_to_color(color), 
-                                        hoverinfo='none')
+                                        hoverinfo='none',
+                                        showlegend=False)
             trace_convex_hulls.append(trace_convex_hull)
     except Exception:
         pass
