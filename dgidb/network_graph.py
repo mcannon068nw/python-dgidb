@@ -1,5 +1,4 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 def initalize_network(interactions):
