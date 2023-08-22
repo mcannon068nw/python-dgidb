@@ -91,7 +91,6 @@ def get_interactions(terms,search='genes',use_pandas=True,immunotherapy=None,ant
     else:
         raise Exception("Search type must be specified using: search='drugs' or search='genes'")
 
-    #print(query)
     r = requests.post(base_url, json={'query': query})
 
     if use_pandas == True:
