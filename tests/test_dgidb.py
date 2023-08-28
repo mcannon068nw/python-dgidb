@@ -3,7 +3,6 @@ import requests
 import pandas as pd
 import pytest
 
-
 def test_get_interactions():
     """Test that interactions works correctly"""
 

@@ -59,7 +59,7 @@ def get_gene(terms,use_pandas=True):
     query = "{\ngenes(names: [\"" + terms.upper() +"\"]) {\nnodes\n{name\nlongName\nconceptId\ngeneAliases {\nalias\n}\ngeneAttributes {\nname\nvalue\n}\n}\n}\n}"
 
     r = requests.post(base_url, json={'query': query})
-
+    
     if use_pandas == True:
         data = __process_gene(r.json()) # TODO: create __process_gene() method
     elif use_pandas == False:
@@ -87,7 +87,7 @@ def get_interactions(terms,search='genes',use_pandas=True,immunotherapy=None,ant
     if search == 'genes':
         query = "{\ngenes(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\nlongName\ngeneCategories{\nname\n}\ninteractions {\ninteractionAttributes {\nname\nvalue\n}\ndrug {\nname\napproved\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     elif search == 'drugs':
-        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + "){\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
+        query = "{\ndrugs(names: [\"" + terms.upper() + "\"]" + filters + ") {\nnodes{\nname\napproved\ninteractions {\ngene {\nname\n}\ninteractionAttributes {\nname\nvalue\n}\ninteractionScore\ninteractionClaims {\npublications {\npmid\ncitation\n}\nsource {\nfullName\nid\n}\n}\n}\n}\n}\n}"
     else:
         raise Exception("Search type must be specified using: search='drugs' or search='genes'")
 
@@ -233,6 +233,7 @@ def __process_gene_search(results):
             interactionattributes_list.append(" | ".join(list_string))
 
             list_string = []
+            sub_list_string = []
             for claim in interaction['interactionClaims']:
                 list_string.append(f"{claim['source']['fullName']}")
                 sub_list_string = []
@@ -304,6 +305,7 @@ def __process_drug_search(results):
             interactionattributes_list.append("| ".join(list_string))
 
             list_string = []
+            sub_list_string = []
             for claim in interaction['interactionClaims']:
                 list_string.append(f"{claim['source']['fullName']}")
                 sub_list_string = []
