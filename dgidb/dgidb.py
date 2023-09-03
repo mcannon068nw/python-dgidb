@@ -67,7 +67,6 @@ def get_gene(terms,use_pandas=True):
 
     return(data)
 
-
 def get_interactions(terms,search='genes',use_pandas=True,immunotherapy=None,antineoplastic=None,sourcedbname=None,pmid=None,interactiontype=None,approved=None):
 
     if isinstance(terms,list):
@@ -138,6 +137,16 @@ def get_source(type='all'):
     data = r.json()
 
     return(data)
+
+def get_gene_list():
+    query = "{\ngenes {\nnodes {\nname\n}\n}\n}"
+    r = requests.post(base_url, json={'query': query})
+    gene_list = []
+    for match in r.json()['data']['genes']['nodes']:
+        gene_name = match['name']
+        gene_list.append(gene_name)
+    gene_list.sort()
+    return gene_list
 
 def __process_drug(results):
     drug_list = []

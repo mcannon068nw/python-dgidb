@@ -2,18 +2,9 @@ import dgidb
 import network_graph as ng
 from dash import dash, dcc, html, Input, Output
 import dash_bootstrap_components as dbc
-import csv
-
-def csv_to_list(file_path):
-    data_list = []
-    with open(file_path, 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            data_list.extend(row)
-    return data_list
 
 def generate_app():  
-    genes = csv_to_list("dgidb-v5-genes.csv")
+    genes = dgidb.get_gene_list()
     plot = ng.generate_plotly(None)
 
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
