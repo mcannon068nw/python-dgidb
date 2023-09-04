@@ -19,6 +19,7 @@ def generate_app():
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
     set_app_layout(app,plot,genes)
     update_plot_from_dropdown(app)
+    update_edge_text(app)
 
     if(__name__ == '__main__'):
         app.run_server(debug=True)
@@ -36,6 +37,10 @@ def set_app_layout(app,plot,genes):
         multi=True
     )
 
+    edge_text = dcc.Markdown(
+        id='edge-info'
+    )
+    
     app.layout = html.Div([
         dbc.Row([
             dbc.Col(
@@ -46,12 +51,17 @@ def set_app_layout(app,plot,genes):
                 ),
                 width=8
             ),
-            dbc.Col(
+            dbc.Col([
                 dbc.Card(
                     dropdown_display,
                     body=True,
                     style={'margin': '10px'}
                 ),
+                dbc.Card(
+                    edge_text,
+                    body=True,
+                    style={'margin': '10px'}
+                )],
                 width=4
             )
         ])
@@ -69,3 +79,17 @@ def update_plot_from_dropdown(app):
             updated_plot = ng.generate_plotly(updated_graph)
             return updated_plot
         return ng.generate_plotly(None)
+    
+def update_edge_text(app):
+    @app.callback(
+        Output('edge-info', 'children'),
+        [Input('network-graph', 'clickData')]
+    )
+    def update(clickData):
+        if clickData and 'points' in clickData:
+            selected_element = clickData['points'][0]
+            selected_curve_number = selected_element.get('curveNumber')
+            if(selected_curve_number == 1):
+                selected_data = selected_element.get('customdata')
+                return "Approval: " + str(selected_data[0]) + "\n\nScore: " + str(selected_data[1]) + "\n\nAttributes: " + str(selected_data[2]) + "\n\nSource: " + str(selected_data[3]) + "\n\nPmid: " + str(selected_data[4])
+        return dash.no_update
