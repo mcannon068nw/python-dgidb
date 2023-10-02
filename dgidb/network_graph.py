@@ -149,3 +149,6 @@ def create_trace_edges(graph,pos):
     )
 
     return trace_edges,i_trace_edges
+
+def get_neighbors(graph,node):
+    return list(graph.neighbors(node))
