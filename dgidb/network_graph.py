@@ -7,7 +7,7 @@ def initalize_network(interactions):
         interactions_graph.add_node(int_gene,isGene=True)
         interactions_graph.add_node(int_drug,isGene=False)
         interactions_graph.add_edge(int_gene,int_drug,
-                                    id=int_gene+" - "+int_drug,
+                                    id=int_gene + " - " + int_drug,
                                     approval=int_approval,
                                     score=int_score,attributes=int_attributes,
                                     source=int_source,pmid=int_pmid
@@ -60,9 +60,9 @@ def generate_plotly(graph):
 
 def create_trace_nodes(graph,pos):
     nodes_by_group = {
-        'cyan': {'node_x': [], 'node_y': [], 'node_text': [], 'node_color': [], 'node_size': [], 'legend_name': "genes"},
-        'orange': {'node_x': [], 'node_y': [], 'node_text': [], 'node_color': [], 'node_size': [], 'legend_name': "multi-degree drugs"},
-        'red': {'node_x': [], 'node_y': [], 'node_text': [], 'node_color': [], 'node_size': [], 'legend_name': "single-degree drugs"}
+        'cyan': {'node_x': [], 'node_y': [], 'node_text': [], 'node_color': [], 'node_size': [], 'neighbors': [], 'legend_name': "genes"},
+        'orange': {'node_x': [], 'node_y': [], 'node_text': [], 'node_color': [], 'node_size': [], 'neighbors': [], 'legend_name': "multi-degree drugs"},
+        'red': {'node_x': [], 'node_y': [], 'node_text': [], 'node_color': [], 'node_size': [], 'neighbors': [], 'legend_name': "single-degree drugs"}
     }
 
     for node in graph.nodes():
@@ -74,6 +74,7 @@ def create_trace_nodes(graph,pos):
         nodes_by_group[node_color]['node_text'].append(str(node))
         nodes_by_group[node_color]['node_color'].append(node_color)
         nodes_by_group[node_color]['node_size'].append(node_size)
+        nodes_by_group[node_color]['neighbors'].append(list(graph.neighbors(node)))
 
     trace_nodes = []
     for key,value in nodes_by_group.items():
@@ -90,7 +91,8 @@ def create_trace_nodes(graph,pos):
             hoverinfo='text',
             visible=True,
             showlegend=True,
-            name=value['legend_name']
+            name=value['legend_name'],
+            customdata=value['neighbors']
         )
         trace_nodes.append(trace_group)
 
@@ -150,5 +152,5 @@ def create_trace_edges(graph,pos):
 
     return trace_edges,i_trace_edges
 
-def get_neighbors(graph,node):
-    return list(graph.neighbors(node))
+def generate_json(graph):
+    return nx.node_link_data(graph)
