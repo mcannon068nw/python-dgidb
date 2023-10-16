@@ -20,8 +20,9 @@ def generate_app():
     set_app_layout(app,plot,genes)
     update_plot(app)
     update_selected_node(app)
+    update_selected_node_display(app)
     update_neighbor_dropdown(app)
-    update_edge_info(app)
+    #update_edge_info(app)
 
     if(__name__ == '__main__'):
         app.run_server(debug=True)
@@ -39,13 +40,17 @@ def set_app_layout(app,plot,genes):
         multi=True
     )
 
+    selected_node_display = dcc.Markdown(
+        id='selected-node-text'
+    )
+    
     neighbors_dropdown_display = dcc.Dropdown(
         id='neighbor-dropdown',
         multi=False
     )
 
     edge_info_display = dcc.Markdown(
-        id='edge-info'
+        id='edge-info-text'
     )
     
     app.layout = html.Div([
@@ -66,6 +71,11 @@ def set_app_layout(app,plot,genes):
             dbc.Col([
                 dbc.Card(
                     genes_dropdown_display,
+                    body=True,
+                    style={'margin': '10px'}
+                ),
+                dbc.Card(
+                    selected_node_display,
                     body=True,
                     style={'margin': '10px'}
                 ),
@@ -108,19 +118,28 @@ def update_selected_node(app):
             return selected_node
         return dash.no_update
 
+def update_selected_node_display(app):
+    @app.callback(
+        Output('selected-node-text', 'children'),
+        Input('selected-node', 'data')
+    )
+    def update(selected_node):
+        return selected_node['text']
+        print(selected_node)
+
 def update_neighbor_dropdown(app):
     @app.callback(
         Output('neighbor-dropdown', 'options'),
         Input('selected-node', 'data')
     )
     def update(selected_node):
-        if(selected_node is not None and selected_node['curveNumber'] != 1):
+        if(selected_node['curveNumber'] != 1):
             return selected_node['customdata']
         return dash.no_update
 
 def update_edge_info(app):
     @app.callback(
-        Output('edge-info', 'children'),
+        Output('edge-info-text', 'children'),
         [Input('selected-node', 'data'), Input('neighbor-dropdown', 'value')],
         State('graph', 'data')
     )

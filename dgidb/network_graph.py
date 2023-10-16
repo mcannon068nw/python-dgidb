@@ -1,17 +1,22 @@
 import networkx as nx
 import plotly.graph_objects as go
 
+PLOTLY_SEED = 7
+
 def initalize_network(interactions):
     interactions_graph = nx.Graph()
-    for int_gene,int_drug,int_approval,int_score,int_attributes,int_source,int_pmid in zip(interactions['gene'],interactions['drug'],interactions['approval'],interactions['score'],interactions['interaction_attributes'],interactions['source'],interactions['pmid']):
-        interactions_graph.add_node(int_gene,isGene=True)
-        interactions_graph.add_node(int_drug,isGene=False)
-        interactions_graph.add_edge(int_gene,int_drug,
-                                    id=int_gene + " - " + int_drug,
-                                    approval=int_approval,
-                                    score=int_score,attributes=int_attributes,
-                                    source=int_source,pmid=int_pmid
-                                    )
+    for index in interactions.index:
+        interactions_graph.add_node(interactions['gene'][index],isGene=True)
+        interactions_graph.add_node(interactions['drug'][index],isGene=False)
+        interactions_graph.add_edge(
+            interactions['gene'][index],interactions['drug'][index],
+            id=interactions['gene'][index]+" - "+interactions['drug'][index],
+            approval=interactions['approval'][index],
+            score=interactions['score'][index],
+            attributes=interactions['interaction_attributes'][index],
+            source=interactions['source'][index],
+            pmid=interactions['pmid'][index]
+        )
     return interactions_graph
 
 def add_node_attributes(interactions_graph):
@@ -46,7 +51,7 @@ def generate_plotly(graph):
     fig = go.Figure(layout=layout)
     
     if(graph is not None):
-        pos = nx.spring_layout(graph, seed=7)
+        pos = nx.spring_layout(graph, seed=PLOTLY_SEED)
 
         trace_nodes = create_trace_nodes(graph,pos)
         trace_edges = create_trace_edges(graph,pos)
@@ -77,22 +82,22 @@ def create_trace_nodes(graph,pos):
         nodes_by_group[node_color]['neighbors'].append(list(graph.neighbors(node)))
 
     trace_nodes = []
-    for key,value in nodes_by_group.items():
+    for node_group,node in nodes_by_group.items():
         trace_group = go.Scatter(
-            x=value['node_x'],
-            y=value['node_y'],
+            x=node['node_x'],
+            y=node['node_y'],
             mode='markers',
             marker=dict(
                 symbol='circle',
-                size=value['node_size'],
-                color=value['node_color']
+                size=node['node_size'],
+                color=node['node_color']
             ),
-            text=value['node_text'],
+            text=node['node_text'],
+            name=node['legend_name'],
+            customdata=node['neighbors'],
             hoverinfo='text',
             visible=True,
-            showlegend=True,
-            name=value['legend_name'],
-            customdata=value['neighbors']
+            showlegend=True
         )
         trace_nodes.append(trace_group)
 
