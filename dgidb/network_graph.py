@@ -110,11 +110,6 @@ def create_trace_edges(graph,pos):
     i_edge_x = []
     i_edge_y = []
     i_edge_id = []
-    i_approval = []
-    i_score = []
-    i_attributes = []
-    i_source = []
-    i_pmid = []
 
     for edge in graph.edges():
         x0, y0 = pos[edge[0]]
@@ -129,11 +124,6 @@ def create_trace_edges(graph,pos):
         i_edge_x.append((x0+x1)/2)
         i_edge_y.append((y0+y1)/2)
         i_edge_id.append(graph.edges[edge]['id'])
-        i_approval.append(graph.edges[edge]['approval'])
-        i_score.append(graph.edges[edge]['score'])
-        i_attributes.append(graph.edges[edge]['attributes'])
-        i_source.append(graph.edges[edge]['source'])
-        i_pmid.append(graph.edges[edge]['pmid'])
 
     trace_edges = go.Scatter(
         x=edge_x,
@@ -151,8 +141,7 @@ def create_trace_edges(graph,pos):
         marker_size=0.5,
         text=i_edge_id,
         hoverinfo='text',
-        showlegend=False,
-        customdata=list(zip(i_approval,i_score,i_attributes,i_source,i_pmid))
+        showlegend=False
     )
 
     return trace_edges,i_trace_edges

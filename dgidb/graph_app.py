@@ -22,7 +22,7 @@ def generate_app():
     update_selected_node(app)
     update_selected_node_display(app)
     update_neighbor_dropdown(app)
-    #update_edge_info(app)
+    update_edge_info(app)
 
     if(__name__ == '__main__'):
         app.run_server(debug=True)
@@ -135,7 +135,8 @@ def update_neighbor_dropdown(app):
     def update(selected_node):
         if(selected_node['curveNumber'] != 1):
             return selected_node['customdata']
-        return dash.no_update
+        else:
+            return []
 
 def update_edge_info(app):
     @app.callback(
@@ -144,20 +145,25 @@ def update_edge_info(app):
         State('graph', 'data')
     )
     def update(selected_node,selected_neighbor,graph):
-        if(selected_node is not None and selected_node['curveNumber'] == 1):
-            selected_data = selected_node['customdata']
-            return "ID: " + str(selected_node['text']) + "\n\nApproval: " + str(selected_data[0]) + "\n\nScore: " + str(selected_data[1]) + "\n\nAttributes: " + str(selected_data[2]) + "\n\nSource: " + str(selected_data[3]) + "\n\nPmid: " + str(selected_data[4])
-        if(selected_node is not None and selected_neighbor is not None):
+        if selected_node is None:
+            return dash.no_update
+        if(selected_node['curveNumber'] == 1):
+            selected_data = get_node_data_from_id(graph['links'], selected_node['text'])
+            return "ID: " + str(selected_data['id']) + "\n\nApproval: " + str(selected_data['approval']) + "\n\nScore: " + str(selected_data['score']) + "\n\nAttributes: " + str(selected_data['attributes']) + "\n\nSource: " + str(selected_data['source']) + "\n\nPmid: " + str(selected_data['pmid'])
+        if selected_neighbor is not None:
             edge_node_id = None
             selected_node_is_gene = get_node_data_from_id(graph['nodes'], selected_node['text'])['isGene']
             selected_neighbor_is_gene = get_node_data_from_id(graph['nodes'], selected_neighbor)['isGene']
-            if((selected_node_is_gene is True) and (selected_neighbor_is_gene is False)):
-                edge_node_id = selected_node['text'] + " - " + selected_neighbor
-            elif((selected_node_is_gene is False) and (selected_neighbor_is_gene is True)):
-                edge_node_id = selected_neighbor + " - " + selected_node['text']
-            else:
+            if(selected_node_is_gene == selected_neighbor_is_gene):
                 return dash.no_update
+            elif(selected_node_is_gene):
+                edge_node_id = selected_node['text'] + " - " + selected_neighbor
+            elif(selected_neighbor_is_gene):
+                edge_node_id = selected_neighbor + " - " + selected_node['text']
+
             selected_data = get_node_data_from_id(graph['links'], edge_node_id)
+            if selected_data is None:
+                return dash.no_update
             return "ID: " + str(selected_data['id']) + "\n\nApproval: " + str(selected_data['approval']) + "\n\nScore: " + str(selected_data['score']) + "\n\nAttributes: " + str(selected_data['attributes']) + "\n\nSource: " + str(selected_data['source']) + "\n\nPmid: " + str(selected_data['pmid'])
         return dash.no_update
     
