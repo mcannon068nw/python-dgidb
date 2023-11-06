@@ -1,6 +1,6 @@
 import dgidb
 import network_graph as ng
-from dash import dash, dcc, html, Input, Output, State
+from dash import dash, dcc, html, Input, Output, State, ctx
 import dash_bootstrap_components as dbc
 import csv
 
@@ -55,7 +55,7 @@ def set_app_layout(app,plot,genes):
     
     app.layout = html.Div([
         # Variables
-        dcc.Store(id='selected-node'),
+        dcc.Store(id='selected-node', data=""),
         dcc.Store(id='graph'),
 
         # Layout
@@ -106,13 +106,15 @@ def update_plot(app):
             updated_plot = ng.generate_plotly(updated_graph)
             return ng.generate_json(updated_graph), updated_plot
         return None, ng.generate_plotly(None)
-    
+
 def update_selected_node(app):
     @app.callback(
         Output('selected-node', 'data'),
-        Input('network-graph', 'clickData')
+        [Input('network-graph', 'clickData'),Input('gene-dropdown', 'value')]
     )
-    def update(clickData):
+    def update(clickData,newGene):
+        if ctx.triggered_id == "gene-dropdown":
+            return ""
         if clickData is not None and 'points' in clickData:
             selected_node = clickData['points'][0]
             return selected_node
@@ -124,19 +126,20 @@ def update_selected_node_display(app):
         Input('selected-node', 'data')
     )
     def update(selected_node):
-        return selected_node['text']
-        print(selected_node)
+        if selected_node != "":
+            return selected_node['text']
+        return ""
 
 def update_neighbor_dropdown(app):
     @app.callback(
-        Output('neighbor-dropdown', 'options'),
+        [Output('neighbor-dropdown', 'options'),Output('neighbor-dropdown', 'value')],
         Input('selected-node', 'data')
     )
-    def update(selected_node):
-        if(selected_node['curveNumber'] != 1):
-            return selected_node['customdata']
+    def update(selected_node):   
+        if(selected_node != "" and selected_node['curveNumber'] != 1):
+            return selected_node['customdata'], None
         else:
-            return []
+            return [], None
 
 def update_edge_info(app):
     @app.callback(
@@ -145,8 +148,8 @@ def update_edge_info(app):
         State('graph', 'data')
     )
     def update(selected_node,selected_neighbor,graph):
-        if selected_node is None:
-            return dash.no_update
+        if selected_node == "":
+            return ""
         if(selected_node['curveNumber'] == 1):
             selected_data = get_node_data_from_id(graph['links'], selected_node['text'])
             return "ID: " + str(selected_data['id']) + "\n\nApproval: " + str(selected_data['approval']) + "\n\nScore: " + str(selected_data['score']) + "\n\nAttributes: " + str(selected_data['attributes']) + "\n\nSource: " + str(selected_data['source']) + "\n\nPmid: " + str(selected_data['pmid'])
@@ -165,7 +168,7 @@ def update_edge_info(app):
             if selected_data is None:
                 return dash.no_update
             return "ID: " + str(selected_data['id']) + "\n\nApproval: " + str(selected_data['approval']) + "\n\nScore: " + str(selected_data['score']) + "\n\nAttributes: " + str(selected_data['attributes']) + "\n\nSource: " + str(selected_data['source']) + "\n\nPmid: " + str(selected_data['pmid'])
-        return dash.no_update
+        return ""
     
 def get_node_data_from_id(nodes, node_id):
     for node in nodes:
