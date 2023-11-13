@@ -108,6 +108,8 @@ def update_selected_node(app):
             return ""
         if clickData is not None and 'points' in clickData:
             selected_node = clickData['points'][0]
+            if 'text' not in selected_node:
+                return dash.no_update
             return selected_node
         return dash.no_update
 
