@@ -93,7 +93,7 @@ def update_plot(app):
     def update(selected_genes):
         if(selected_genes is not None):
             gene_interactions = dgidb.get_interactions(selected_genes)
-            updated_graph = ng.create_network(gene_interactions)
+            updated_graph = ng.create_network(gene_interactions,selected_genes)
             updated_plot = ng.generate_plotly(updated_graph)
             return ng.generate_json(updated_graph), updated_plot
         return None, ng.generate_plotly(None)

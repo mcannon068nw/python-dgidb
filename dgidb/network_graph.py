@@ -3,9 +3,11 @@ import plotly.graph_objects as go
 
 PLOTLY_SEED = 7
 
-def initalize_network(interactions):
+def initalize_network(interactions,selected_genes):
     interactions_graph = nx.Graph()
+    graphed_genes = set()
     for index in interactions.index:
+        graphed_genes.add(interactions['gene'][index])
         interactions_graph.add_node(interactions['gene'][index],isGene=True)
         interactions_graph.add_node(interactions['drug'][index],isGene=False)
         interactions_graph.add_edge(
@@ -17,6 +19,9 @@ def initalize_network(interactions):
             source=interactions['source'][index],
             pmid=interactions['pmid'][index]
         )
+    ungraphed_genes = set(selected_genes).difference(graphed_genes)
+    for gene in ungraphed_genes:
+        interactions_graph.add_node(gene,isGene=True)
     return interactions_graph
 
 def add_node_attributes(interactions_graph):
@@ -36,8 +41,8 @@ def add_node_attributes(interactions_graph):
         interactions_graph.nodes[node]['node_color'] = set_color
         interactions_graph.nodes[node]['node_size'] = set_size
 
-def create_network(interactions):
-    interactions_graph = initalize_network(interactions)
+def create_network(interactions,selected_genes):
+    interactions_graph = initalize_network(interactions,selected_genes)
     add_node_attributes(interactions_graph)
     return interactions_graph
 
