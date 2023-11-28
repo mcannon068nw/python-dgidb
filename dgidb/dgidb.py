@@ -148,6 +148,16 @@ def get_gene_list():
     gene_list.sort()
     return gene_list
 
+def get_drug_list():
+    query = "{\ndrugs {\nnodes {\nname\n}\n}\n}"
+    r = requests.post(base_url, json={'query': query})
+    gene_list = []
+    for match in r.json()['data']['drugs']['nodes']:
+        gene_name = match['name']
+        gene_list.append(gene_name)
+    gene_list.sort()
+    return gene_list
+
 def __process_drug(results):
     drug_list = []
     concept_list = []

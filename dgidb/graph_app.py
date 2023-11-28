@@ -4,7 +4,7 @@ from dash import dash, dcc, html, Input, Output, State, ctx
 import dash_bootstrap_components as dbc
 
 def generate_app():  
-    genes = dgidb.get_gene_list()
+    genes = dgidb.get_drug_list()
     plot = ng.generate_plotly(None)
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -92,7 +92,7 @@ def update_plot(app):
     )
     def update(selected_genes):
         if(selected_genes is not None):
-            gene_interactions = dgidb.get_interactions(selected_genes)
+            gene_interactions = dgidb.get_interactions(selected_genes,"drugs")
             updated_graph = ng.create_network(gene_interactions,selected_genes)
             updated_plot = ng.generate_plotly(updated_graph)
             return ng.generate_json(updated_graph), updated_plot
