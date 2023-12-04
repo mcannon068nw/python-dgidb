@@ -38,3 +38,7 @@ Example usage:
 - [x] Make drugApplications and appNo fields accessible for drug information
 - [ ] Implement metadata support (i.e. get_source)
 - [ ] Implement support for live dgidb (pending v5 launch date)
+
+
+## Graph App Functionality
+blah blah **important point** *look up markdown format*
