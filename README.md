@@ -33,12 +33,11 @@ Example usage:
   
   
 ## TO DO:
-- [x] More parameter options for searches (i.e. approved, immunotherapy, antineoplastic)
-- [x] Implement search for just gene information (similar to get_drug)
-- [x] Make drugApplications and appNo fields accessible for drug information
 - [ ] Implement metadata support (i.e. get_source)
 - [ ] Implement support for live dgidb (pending v5 launch date)
+- [ ] Tutorial for Graph App Functionality
+- [ ] Notebooks for analysis purposes
 
 
 ## Graph App Functionality
-blah blah **important point** *look up markdown format*
+Tutorial goes here
