@@ -37,6 +37,7 @@ Example usage:
 - [ ] Implement support for live dgidb (pending v5 launch date)
 - [ ] Tutorial for Graph App Functionality
 - [ ] Notebooks for analysis purposes
+- [ ] Update tests
 
 
 ## Graph App Functionality
