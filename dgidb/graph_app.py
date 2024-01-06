@@ -3,13 +3,20 @@ import network_graph as ng
 from dash import dash, dcc, html, Input, Output, State, ctx
 import dash_bootstrap_components as dbc
 
-def generate_app():  
-    genes = dgidb.get_drug_list()
+def generate_app(search='genes'):  
+    list = None
+    if search == 'genes':
+        list = dgidb.get_gene_list()
+    elif search == 'drugs':
+        list = dgidb.get_drug_list()
+    else:
+        raise Exception("Search type must be specified using: search='drugs' or search='genes'")
+
     plot = ng.generate_plotly(None)
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    set_app_layout(app,plot,genes)
-    update_plot(app)
+    set_app_layout(app,plot,list)
+    update_plot(app,search)
     update_selected_node(app)
     update_selected_node_display(app)
     update_neighbor_dropdown(app)
@@ -85,15 +92,15 @@ def set_app_layout(app,plot,genes):
         ])
     ])
 
-def update_plot(app):
+def update_plot(app,search):
     @app.callback(
         [Output('graph', 'data'), Output('network-graph', 'figure')],
         Input('gene-dropdown', 'value')
     )
     def update(selected_genes):
         if(selected_genes is not None):
-            gene_interactions = dgidb.get_interactions(selected_genes,"drugs")
-            updated_graph = ng.create_network(gene_interactions,selected_genes)
+            interactions = dgidb.get_interactions(selected_genes,search)
+            updated_graph = ng.create_network(interactions,selected_genes)
             updated_plot = ng.generate_plotly(updated_graph)
             return ng.generate_json(updated_graph), updated_plot
         return None, ng.generate_plotly(None)
