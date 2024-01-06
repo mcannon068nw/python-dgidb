@@ -1,5 +1,5 @@
-import dgidb
-import network_graph as ng
+from dgidb import dgidb
+from dgidb import network_graph as ng
 from dash import dash, dcc, html, Input, Output, State, ctx
 import dash_bootstrap_components as dbc
 
@@ -15,8 +15,7 @@ def generate_app():
     update_neighbor_dropdown(app)
     update_edge_info(app)
 
-    if(__name__ == '__main__'):
-        app.run_server(debug=True)
+    return app
 
 def set_app_layout(app,plot,genes):
     graph_display = dcc.Graph(
@@ -32,7 +31,8 @@ def set_app_layout(app,plot,genes):
     )
 
     selected_node_display = dcc.Markdown(
-        id='selected-node-text'
+        id='selected-node-text',
+        children="No Node Selected"
     )
     
     neighbors_dropdown_display = dcc.Dropdown(
@@ -41,7 +41,8 @@ def set_app_layout(app,plot,genes):
     )
 
     edge_info_display = dcc.Markdown(
-        id='edge-info-text'
+        id='edge-info-text',
+        children="No Edge Selected"
     )
     
     app.layout = html.Div([
@@ -61,23 +62,28 @@ def set_app_layout(app,plot,genes):
             ),
             dbc.Col([
                 dbc.Card(
-                    genes_dropdown_display,
-                    body=True,
+                    [
+                        dbc.CardHeader("Genes Dropdown Display"),
+                        dbc.CardBody(genes_dropdown_display),
+                    ],
                     style={'margin': '10px'}
                 ),
                 dbc.Card(
-                    selected_node_display,
-                    body=True,
+                    [
+                        dbc.CardHeader("Neighbors Dropdown Display"),
+                        dbc.CardBody(neighbors_dropdown_display),
+                    ],
                     style={'margin': '10px'}
                 ),
                 dbc.Card(
-                    neighbors_dropdown_display,
-                    body=True,
-                    style={'margin': '10px'}
-                ),
-                dbc.Card(
-                    edge_info_display,
-                    body=True,
+                    dbc.CardBody(
+                        [
+                            html.H4("Selected Node/Edge:"),
+                            html.P(selected_node_display),
+                            html.H4("Selected Edge Info:"),
+                            html.P(edge_info_display)
+                        ]
+                    ),
                     style={'margin': '10px'}
                 )],
                 width=4
@@ -121,7 +127,7 @@ def update_selected_node_display(app):
     def update(selected_node):
         if selected_node != "":
             return selected_node['text']
-        return ""
+        return "No Node Selected"
 
 def update_neighbor_dropdown(app):
     @app.callback(
@@ -142,7 +148,7 @@ def update_edge_info(app):
     )
     def update(selected_node,selected_neighbor,graph):
         if selected_node == "":
-            return ""
+            return "No Edge Selected"
         if(selected_node['curveNumber'] == 1):
             selected_data = get_node_data_from_id(graph['links'], selected_node['text'])
             return "ID: " + str(selected_data['id']) + "\n\nApproval: " + str(selected_data['approval']) + "\n\nScore: " + str(selected_data['score']) + "\n\nAttributes: " + str(selected_data['attributes']) + "\n\nSource: " + str(selected_data['source']) + "\n\nPmid: " + str(selected_data['pmid'])
@@ -156,12 +162,11 @@ def update_edge_info(app):
                 edge_node_id = selected_node['text'] + " - " + selected_neighbor
             elif(selected_neighbor_is_gene):
                 edge_node_id = selected_neighbor + " - " + selected_node['text']
-
             selected_data = get_node_data_from_id(graph['links'], edge_node_id)
             if selected_data is None:
                 return dash.no_update
             return "ID: " + str(selected_data['id']) + "\n\nApproval: " + str(selected_data['approval']) + "\n\nScore: " + str(selected_data['score']) + "\n\nAttributes: " + str(selected_data['attributes']) + "\n\nSource: " + str(selected_data['source']) + "\n\nPmid: " + str(selected_data['pmid'])
-        return ""
+        return "No Edge Selected"
     
 def get_node_data_from_id(nodes, node_id):
     for node in nodes:
