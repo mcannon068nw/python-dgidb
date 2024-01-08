@@ -60,8 +60,6 @@ The "Neighbors Dropdown Display" provides a dropdown menu listing every neighbor
 As previously mentioned, "Selected Node/Edge" will update when a node or edge is selected on the graph by the user. "Selected Edge Info" will update when either 1) the user selects an edge directly from the graph, or 2) the user selects a node (drug/gene) and uses the "Neighbors Dropdown Display" to select an neighbor to view an edge.
 
 ## TO DO:
-- [x] More parameter options for searches (i.e. approved, immunotherapy, antineoplastic)
-- [x] Implement search for just gene information (similar to get_drug)
-- [x] Make drugApplications and appNo fields accessible for drug information
 - [ ] Implement metadata support (i.e. get_source)
 - [ ] Implement support for live dgidb (pending v5 launch date)
+- [ ] Notebooks for analysis purposes
