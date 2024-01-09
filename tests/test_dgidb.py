@@ -90,5 +90,3 @@ def test_get_drugs():
     results = dgidb.get_drug(query,use_pandas=False)
     assert type(results) != type(pd.DataFrame())
     assert type(results) == type(dict())
-
-
