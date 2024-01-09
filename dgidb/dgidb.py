@@ -59,9 +59,9 @@ def get_gene(terms,use_pandas=True):
     query = "{\ngenes(names: [\"" + terms.upper() +"\"]) {\nnodes\n{name\nlongName\nconceptId\ngeneAliases {\nalias\n}\ngeneAttributes {\nname\nvalue\n}\n}\n}\n}"
 
     r = requests.post(base_url, json={'query': query})
-    
+
     if use_pandas == True:
-        data = __process_gene(r.json()) # TODO: create __process_gene() method
+        data = __process_gene(r.json())
     elif use_pandas == False:
         data = r.json()
 
