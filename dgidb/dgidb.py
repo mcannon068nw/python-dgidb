@@ -148,6 +148,24 @@ def get_gene_list():
     gene_list.sort()
     return gene_list
 
+def get_drug_applications(terms,use_pandas=True):
+
+    if isinstance(terms,list):
+        terms = '\",\"'.join(terms)
+
+    query = "{\ndrugs(names: [\"" + terms.upper() + "\"]) {\nnodes{\nname \ndrugApplications {\nappNo\n}\n}\n}\n}\n"
+
+    r = requests.post(base_url, json={'query': query})
+
+    if use_pandas == True:
+        data = __process_drug_applications(r.json())
+        data = __openfda_data(data)
+    elif use_pandas == False:
+        data = r.json()
+
+    return(data)
+
+
 def __process_drug(results):
     drug_list = []
     concept_list = []
@@ -332,3 +350,45 @@ def __process_drug_search(results):
                                 source=sources_list,
                                 pmid=pmids_list)
     return(data)
+
+def __process_drug_applications(data):
+    drug_list = []
+    application_list = []
+
+    for node in data['data']['drugs']['nodes']:
+        current_drug = node['name']
+        for application in node['drugApplications']:
+            drug_list.append(current_drug)
+            application = application['appNo'].split('.')[1].replace(':','').upper()
+            application_list.append(application)
+
+    dataframe = pd.DataFrame().assign(drug=drug_list,
+                                        application=application_list)
+
+    return(dataframe)
+
+
+def __openfda_data(dataframe):
+    openfda_base_url = 'https://api.fda.gov/drug/drugsfda.json?search=openfda.application_number:'
+    terms = list(dataframe['application'])
+    descriptions = []
+    for term in terms:
+        r = requests.get(f'{openfda_base_url}\"{term}\"',headers={'User-Agent': 'Custom'})
+        try:
+            r.json()['results'][0]['products']
+
+            f = []
+            for product in r.json()['results'][0]['products']:
+                brand_name = product['brand_name']
+                marketing_status = product['marketing_status']
+                dosage_form = product['dosage_form']
+                active_ingredient = product['active_ingredients'][0]['name']
+                dosage_strength = product['active_ingredients'][0]['strength']
+                f.append(f'{brand_name}: {dosage_strength} {marketing_status} {dosage_form}')
+
+            descriptions.append(' | '.join(f))
+        except:
+            descriptions.append('none')
+
+    dataframe = dataframe.assign(description=descriptions)
+    return(dataframe)
